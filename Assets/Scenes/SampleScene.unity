@@ -568,6 +568,7 @@ MonoBehaviour:
   rearLeftWheel: {fileID: 1969110623}
   rearRightWheel: {fileID: 1268198375}
   maxMotorTorque: 80
+  maxBrakeTorque: 150
   currentSpeed: 0
   maxSpeed: 100
   centerOfMass: {x: 0, y: -0.01, z: 0}
@@ -652,13 +653,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: -0.28174886, y: 0.45998535, z: -0.16528055, w: -0.82565945}
-  m_LocalPosition: {x: 5.48, y: 0.37, z: 8.65}
+  m_LocalRotation: {x: -0.22620344, y: -0.69336027, z: 0.23313095, w: -0.6432212}
+  m_LocalPosition: {x: 3.8, y: 0.61, z: 8.72}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 38.12, y: -417.9, z: 1}
+  m_LocalEulerAnglesHint: {x: 37.9, y: -265.36, z: 1}
 --- !u!114 &963194229
 MonoBehaviour:
   m_ObjectHideFlags: 0
