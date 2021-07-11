@@ -21,8 +21,15 @@ public class CarEngine : MonoBehaviour
     public Texture2D textureBraking;
     public Renderer carRenderer;
 
+    [Header("Sensors")]
+    public float sensorLength = 2f;
+    public Vector3 frontSensorPosition = new Vector3(0f,0.07f,0f);
+    public float frontSideSensorPosition = 0.08f;
+    public float frontSensorAngle = 30;
+
     private List<Transform> nodes;
     private int currentNode = 0;
+    private bool avoiding = false;
 
     private void Start()
     {
@@ -40,10 +47,104 @@ public class CarEngine : MonoBehaviour
 
     private void FixedUpdate()
     {
+        Sensors();
         ApplySteer();
         Drive();
         CheckWaypointDistance();
         Braking();
+    }
+
+    private void Sensors()
+    {
+        RaycastHit hit;
+        Vector3 sensorStartingPos = transform.position;
+        sensorStartingPos += transform.forward * frontSensorPosition.z;
+        sensorStartingPos += transform.up * frontSensorPosition.y;
+        float avoidMultiplier = 0;
+        avoiding = false;
+
+        //front right sensor
+        sensorStartingPos += transform.right * frontSideSensorPosition;
+        if (Physics.Raycast(sensorStartingPos, transform.forward, out hit, sensorLength))
+        {
+            if (!hit.collider.CompareTag("Terrain"))
+            {
+                Debug.DrawLine(sensorStartingPos, hit.point);
+                avoiding = true;
+                avoidMultiplier -= 1f; 
+            } 
+        }
+
+
+        //front right angle sensor
+        else if (Physics.Raycast(sensorStartingPos, Quaternion.AngleAxis(frontSensorAngle, transform.up) * transform.forward, out hit, sensorLength))
+        {
+            if (!hit.collider.CompareTag("Terrain"))
+            {
+                Debug.DrawLine(sensorStartingPos, hit.point);
+                avoiding = true;
+                avoidMultiplier -= 0.5f;
+            }
+        }
+
+
+        //front left sensor
+        sensorStartingPos -= transform.right * frontSideSensorPosition * 2;
+        if (Physics.Raycast(sensorStartingPos, transform.forward, out hit, sensorLength))
+        {
+            if (!hit.collider.CompareTag("Terrain"))
+            {
+                Debug.DrawLine(sensorStartingPos, hit.point);
+                avoiding = true;
+                avoidMultiplier += 1f;
+            }
+        }
+
+
+        //front left angle sensor
+        else if (Physics.Raycast(sensorStartingPos, Quaternion.AngleAxis(-frontSensorAngle, transform.up) * transform.forward, out hit, sensorLength))
+        {
+            if (!hit.collider.CompareTag("Terrain"))
+            {
+                Debug.DrawLine(sensorStartingPos, hit.point);
+                avoiding = true;
+                avoidMultiplier += 0.5f;
+            }
+        }
+
+        //front center sensor
+        if (avoidMultiplier == 0)
+        {
+            if (Physics.Raycast(sensorStartingPos, transform.forward, out hit, sensorLength))
+            {
+                if (!hit.collider.CompareTag("Terrain"))
+                {
+                    Debug.DrawLine(sensorStartingPos, hit.point);
+                    avoiding = true;
+                    if (hit.normal.z < 0)
+                    {
+                        avoidMultiplier = 1;
+                    }
+                    else
+                    {
+                        avoidMultiplier = -1;
+                    }
+                }
+            }
+        }
+        if (avoiding)
+        {
+            frontLeftWheel.steerAngle = maxSteerAngile * avoidMultiplier;
+            frontRightWheel.steerAngle = maxSteerAngile * avoidMultiplier;
+        }
+    }
+    private void ApplySteer()
+    {
+        if (avoiding) return;
+        Vector3 relativeVector = transform.InverseTransformPoint(nodes[currentNode].position);
+        float newSteer = (relativeVector.x / relativeVector.magnitude) * maxSteerAngile;
+        frontLeftWheel.steerAngle = newSteer;
+        frontRightWheel.steerAngle = newSteer;
     }
 
     private void Drive()
@@ -70,13 +171,6 @@ public class CarEngine : MonoBehaviour
             else currentNode++;
     }
 
-    private void ApplySteer()
-    {
-        Vector3 relativeVector = transform.InverseTransformPoint(nodes[currentNode].position);
-        float newSteer = (relativeVector.x / relativeVector.magnitude) * maxSteerAngile;
-        frontLeftWheel.steerAngle = newSteer;
-        frontRightWheel.steerAngle = newSteer;
-    }
 
     private void Braking()
     {
