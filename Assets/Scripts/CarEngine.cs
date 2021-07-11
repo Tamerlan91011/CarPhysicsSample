@@ -7,6 +7,7 @@ public class CarEngine : MonoBehaviour
 {
     public Transform path;
     public float maxSteerAngile = 45f;
+    public float turnSpeed = 1;
     public WheelCollider frontLeftWheel;
     public WheelCollider frontRightWheel;
     public WheelCollider rearLeftWheel;
@@ -23,13 +24,14 @@ public class CarEngine : MonoBehaviour
 
     [Header("Sensors")]
     public float sensorLength = 2f;
-    public Vector3 frontSensorPosition = new Vector3(0f,0.07f,0f);
+    public Vector3 frontSensorPosition = new Vector3(0f,0.07f,0.2f);
     public float frontSideSensorPosition = 0.08f;
-    public float frontSensorAngle = 30;
+    public float frontSensorAngle = 35;
 
     private List<Transform> nodes;
     private int currentNode = 0;
     private bool avoiding = false;
+    private float targerSteerAngle = 0;
 
     private void Start()
     {
@@ -52,6 +54,7 @@ public class CarEngine : MonoBehaviour
         Drive();
         CheckWaypointDistance();
         Braking();
+        LerpToSteerAngle();
     }
 
     private void Sensors()
@@ -134,8 +137,7 @@ public class CarEngine : MonoBehaviour
         }
         if (avoiding)
         {
-            frontLeftWheel.steerAngle = maxSteerAngile * avoidMultiplier;
-            frontRightWheel.steerAngle = maxSteerAngile * avoidMultiplier;
+            targerSteerAngle = maxSteerAngile * avoidMultiplier;
         }
     }
     private void ApplySteer()
@@ -143,8 +145,7 @@ public class CarEngine : MonoBehaviour
         if (avoiding) return;
         Vector3 relativeVector = transform.InverseTransformPoint(nodes[currentNode].position);
         float newSteer = (relativeVector.x / relativeVector.magnitude) * maxSteerAngile;
-        frontLeftWheel.steerAngle = newSteer;
-        frontRightWheel.steerAngle = newSteer;
+        targerSteerAngle = newSteer;
     }
 
     private void Drive()
@@ -186,5 +187,11 @@ public class CarEngine : MonoBehaviour
             rearLeftWheel.brakeTorque = 0;
             rearRightWheel.brakeTorque = 0;
         }
+    }
+
+    private void LerpToSteerAngle()
+    {
+        frontLeftWheel.steerAngle = Mathf.Lerp(frontLeftWheel.steerAngle, targerSteerAngle, Time.deltaTime * turnSpeed);
+        frontRightWheel.steerAngle = Mathf.Lerp(frontRightWheel.steerAngle, targerSteerAngle, Time.deltaTime * turnSpeed);
     }
 }
