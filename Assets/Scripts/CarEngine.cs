@@ -7,7 +7,7 @@ public class CarEngine : MonoBehaviour
 {
     public Transform path;
     public float maxSteerAngile = 45f;
-    public float turnSpeed = 1;
+    public float turnSpeed = 0.8f;
     public WheelCollider frontLeftWheel;
     public WheelCollider frontRightWheel;
     public WheelCollider rearLeftWheel;
@@ -23,10 +23,10 @@ public class CarEngine : MonoBehaviour
     public Renderer carRenderer;
 
     [Header("Sensors")]
-    public float sensorLength = 2f;
+    public float sensorLength = 1f;
     public Vector3 frontSensorPosition = new Vector3(0f,0.07f,0.2f);
     public float frontSideSensorPosition = 0.08f;
-    public float frontSensorAngle = 35;
+    public float frontSensorAngle = 30;
 
     private List<Transform> nodes;
     private int currentNode = 0;
